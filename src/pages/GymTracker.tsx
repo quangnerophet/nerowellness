@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import db, { type Exercise, type WorkoutSet, type WorkoutSession } from '../db';
+import db, { type Exercise, type WorkoutSet } from '../db';
 import { useAppStore } from '../store';
 import { getToday } from '../utils';
 import DateNavigator from '../components/DateNavigator';

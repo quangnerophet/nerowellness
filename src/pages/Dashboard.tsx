@@ -81,7 +81,7 @@ export default function Dashboard() {
     const { setActiveTab, selectedDate, setSelectedDate } = useAppStore();
     const today = getToday();
     const userName = useAppStore((s) => s.userName);
-    const userWeightKg = useAppStore((s) => s.userWeightKg);
+    // const userWeightKg = useAppStore((s) => s.userWeightKg); // Unused, keeping for future BMI ref if needed but commented out to pass build
     const proteinTarget = useAppStore((s) => s.dailyProteinTarget());
     const dailyCalorieTarget = useAppStore((s) => s.dailyCalorieTarget);
 
@@ -92,7 +92,7 @@ export default function Dashboard() {
 
     // All data for heatmap
     const allWorkoutSessions = useLiveQuery(() => db.workoutSessions.toArray(), []);
-    const allWorkoutSets = useLiveQuery(() => db.workoutSets.toArray(), []);
+    // const allWorkoutSets = useLiveQuery(() => db.workoutSets.toArray(), []); // Unused in this version
     const allNutritionLogs = useLiveQuery(() => db.nutritionLogs.toArray(), []);
     const allFoods = useLiveQuery(() => db.foods.toArray(), []);
     const allMentalLogs = useLiveQuery(() => db.mentalHealthLogs.toArray(), []);
