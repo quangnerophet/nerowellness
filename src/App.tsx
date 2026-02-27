@@ -4,6 +4,7 @@ import GymTracker from './pages/GymTracker';
 import Nutrition from './pages/Nutrition';
 import MentalHealth from './pages/MentalHealth';
 import Library from './pages/Library';
+import SyncManager from './components/SyncManager';
 import {
   LayoutDashboard,
   Dumbbell,
@@ -42,6 +43,7 @@ function App() {
     <div className="min-h-[100dvh] w-full bg-gray-900 flex items-center justify-center overflow-hidden">
       {/* Mobile Frame */}
       <div className="w-full max-w-[400px] h-[100dvh] bg-white relative flex flex-col overflow-hidden shadow-2xl">
+        <SyncManager />
         {/* Content Area */}
         <div className="flex-1 overflow-y-auto custom-scrollbar pb-20 bg-surface">
           {renderTab()}
