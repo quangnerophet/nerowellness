@@ -37,7 +37,7 @@ export default function GymTracker() {
     const allTodaySets = useLiveQuery(
         () => {
             const ids = todaySessions?.map((s) => s.id!).filter(Boolean) ?? [];
-            if (ids.length === 0) return Promise.resolve([]);
+            if (ids.length === 0) return Promise.resolve([] as WorkoutSet[]);
             return db.workoutSets.where('sessionId').anyOf(ids).toArray();
         },
         [todaySessions]
@@ -53,7 +53,7 @@ export default function GymTracker() {
     }, [todaySessions]);
 
     const activeSession = todaySessions?.find((s) => s.id === activeSessionId);
-    const sessionSets = allTodaySets?.filter((s) => s.sessionId === activeSessionId) ?? [];
+    const sessionSets: WorkoutSet[] = allTodaySets?.filter((s) => s.sessionId === activeSessionId) ?? [];
 
     const exercisesInSession = useMemo(() => {
         const unique = [...new Set(sessionSets.map((s) => s.exerciseId))];
@@ -217,8 +217,8 @@ export default function GymTracker() {
                                 key={s.id}
                                 onClick={() => setActiveSessionId(s.id!)}
                                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${activeSessionId === s.id
-                                        ? 'bg-royal-100 text-royal-800 ring-1 ring-royal-200'
-                                        : 'bg-gray-100 text-text-muted hover:bg-gray-200'
+                                    ? 'bg-royal-100 text-royal-800 ring-1 ring-royal-200'
+                                    : 'bg-gray-100 text-text-muted hover:bg-gray-200'
                                     }`}
                             >
                                 Session {idx + 1}
@@ -503,8 +503,8 @@ function ExerciseCard({
                                 onClick={() => !locked && onToggleComplete(set)}
                                 disabled={locked}
                                 className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all shrink-0 ${set.isCompleted
-                                        ? 'border-emerald-500 bg-emerald-500 text-white'
-                                        : 'border-gray-200 hover:border-emerald-400'
+                                    ? 'border-emerald-500 bg-emerald-500 text-white'
+                                    : 'border-gray-200 hover:border-emerald-400'
                                     } ${locked ? 'cursor-not-allowed opacity-40' : ''}`}
                             >
                                 {set.isCompleted && <Check className="w-3.5 h-3.5" />}
