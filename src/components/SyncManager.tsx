@@ -17,7 +17,7 @@ export default function SyncManager() {
                 const cloudData = await syncService.fetchAllUserData();
 
                 // Clear and Restore logic (Merge could be more complex, but for now Full Replace is safer for cross-device consistency)
-                await db.transaction('rw', [db.userProfile, db.foods, db.nutritionLogs, db.workoutSessions, db.workoutSets, db.mentalHealthLogs], async () => {
+                await db.transaction('rw', [db.userProfile, db.foods, db.nutritionLogs, db.workoutSessions, db.workoutSets, db.exercises, db.mentalHealthLogs], async () => {
                     if (cloudData.profile) {
                         await db.userProfile.put({ ...cloudData.profile, id: 1 });
                     }
@@ -36,6 +36,10 @@ export default function SyncManager() {
                     if (cloudData.workouts.sets.length > 0) {
                         await db.workoutSets.clear();
                         await db.workoutSets.bulkPut(cloudData.workouts.sets);
+                    }
+                    if (cloudData.workouts.exercises.length > 0) {
+                        await db.exercises.clear();
+                        await db.exercises.bulkPut(cloudData.workouts.exercises);
                     }
                     if (cloudData.mentalHealth.logs.length > 0) {
                         await db.mentalHealthLogs.clear();
@@ -61,6 +65,7 @@ export default function SyncManager() {
     const allNutritionLogs = useLiveQuery(() => db.nutritionLogs.toArray());
     const allWorkoutSessions = useLiveQuery(() => db.workoutSessions.toArray());
     const allWorkoutSets = useLiveQuery(() => db.workoutSets.toArray());
+    const allExercises = useLiveQuery(() => db.exercises.toArray());
     const allMentalLogs = useLiveQuery(() => db.mentalHealthLogs.toArray());
 
     // Sync Profile (Push)
@@ -79,10 +84,10 @@ export default function SyncManager() {
 
     // Sync Workouts (Push)
     useEffect(() => {
-        if (isSyncedFromCloud && allWorkoutSessions && allWorkoutSets) {
-            syncService.syncWorkouts(allWorkoutSessions, allWorkoutSets).catch(console.error);
+        if (isSyncedFromCloud && allWorkoutSessions && allWorkoutSets && allExercises) {
+            syncService.syncWorkouts(allWorkoutSessions, allWorkoutSets, allExercises).catch(console.error);
         }
-    }, [allWorkoutSessions, allWorkoutSets, isSyncedFromCloud]);
+    }, [allWorkoutSessions, allWorkoutSets, allExercises, isSyncedFromCloud]);
 
     // Sync Mental Health (Push)
     useEffect(() => {

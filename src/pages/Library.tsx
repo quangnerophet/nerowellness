@@ -16,6 +16,7 @@ import {
     Ruler,
     Weight,
     Zap,
+    Edit2,
 } from 'lucide-react';
 
 type LibTab = 'exercises' | 'foods' | 'profile';
@@ -25,7 +26,9 @@ export default function Library() {
     const [showModal, setShowModal] = useState(false);
     const [search, setSearch] = useState('');
     const [exName, setExName] = useState('');
+    const [editExId, setEditExId] = useState<number | null>(null);
     const [foodForm, setFoodForm] = useState({ name: '', calories: '', protein: '', carbs: '', fat: '' });
+    const [editFoodId, setEditFoodId] = useState<number | null>(null);
 
     // Profile state
     const [nameInput, setNameInput] = useState('');
@@ -58,25 +61,36 @@ export default function Library() {
     const filteredFoods =
         foods?.filter((f) => f.name.toLowerCase().includes(search.toLowerCase())) ?? [];
 
-    const addExercise = useCallback(async () => {
+    const saveExercise = useCallback(async () => {
         if (!exName.trim()) return;
-        await db.exercises.add({ name: exName.trim() });
+        if (editExId) {
+            await db.exercises.update(editExId, { name: exName.trim() });
+        } else {
+            await db.exercises.add({ name: exName.trim() });
+        }
         setExName('');
+        setEditExId(null);
         setShowModal(false);
-    }, [exName]);
+    }, [exName, editExId]);
 
-    const addFood = useCallback(async () => {
+    const saveFood = useCallback(async () => {
         if (!foodForm.name.trim()) return;
-        await db.foods.add({
+        const foodData = {
             name: foodForm.name.trim(),
             calories: Number(foodForm.calories) || 0,
             protein: Number(foodForm.protein) || 0,
             carbs: Number(foodForm.carbs) || 0,
             fat: Number(foodForm.fat) || 0,
-        });
+        };
+        if (editFoodId) {
+            await db.foods.update(editFoodId, foodData);
+        } else {
+            await db.foods.add(foodData);
+        }
         setFoodForm({ name: '', calories: '', protein: '', carbs: '', fat: '' });
+        setEditFoodId(null);
         setShowModal(false);
-    }, [foodForm]);
+    }, [foodForm, editFoodId]);
 
     const saveProfile = useCallback(async () => {
         const name = nameInput.trim();
@@ -305,12 +319,24 @@ export default function Library() {
                                             <Dumbbell className="w-4 h-4 text-royal-600" />
                                         </div>
                                         <p className="flex-1 text-sm font-medium text-text-primary">{ex.name}</p>
-                                        <button
-                                            onClick={() => deleteExercise(ex.id!)}
-                                            className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-300 hover:text-danger hover:bg-red-50 transition-colors"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
+                                        <div className="flex items-center gap-1">
+                                            <button
+                                                onClick={() => {
+                                                    setEditExId(ex.id!);
+                                                    setExName(ex.name);
+                                                    setShowModal(true);
+                                                }}
+                                                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-royal-600 hover:bg-royal-50 transition-colors"
+                                            >
+                                                <Edit2 className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => deleteExercise(ex.id!)}
+                                                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-300 hover:text-danger hover:bg-red-50 transition-colors"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
                                     </div>
                                 ))
                             ) : <EmptyState type="exercises" />
@@ -327,12 +353,30 @@ export default function Library() {
                                                 {food.calories}cal · {food.protein}p · {food.carbs}c · {food.fat}f
                                             </p>
                                         </div>
-                                        <button
-                                            onClick={() => deleteFood(food.id!)}
-                                            className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-300 hover:text-danger hover:bg-red-50 transition-colors"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
+                                        <div className="flex items-center gap-1">
+                                            <button
+                                                onClick={() => {
+                                                    setEditFoodId(food.id!);
+                                                    setFoodForm({
+                                                        name: food.name,
+                                                        calories: String(food.calories),
+                                                        protein: String(food.protein),
+                                                        carbs: String(food.carbs),
+                                                        fat: String(food.fat)
+                                                    });
+                                                    setShowModal(true);
+                                                }}
+                                                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-royal-600 hover:bg-royal-50 transition-colors"
+                                            >
+                                                <Edit2 className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => deleteFood(food.id!)}
+                                                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-300 hover:text-danger hover:bg-red-50 transition-colors"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
                                     </div>
                                 ))
                             ) : <EmptyState type="foods" />
@@ -347,10 +391,16 @@ export default function Library() {
                     <div className="bg-white w-full max-w-[400px] rounded-t-3xl animate-slide-up">
                         <div className="px-5 pt-5 pb-3 flex items-center justify-between border-b border-gray-100">
                             <h2 className="text-lg font-bold text-text-primary">
-                                Add {activeTab === 'exercises' ? 'Exercise' : 'Food'}
+                                {activeTab === 'exercises' ? (editExId ? 'Edit Exercise' : 'Add Exercise') : (editFoodId ? 'Edit Food' : 'Add Food')}
                             </h2>
                             <button
-                                onClick={() => { setShowModal(false); setExName(''); setFoodForm({ name: '', calories: '', protein: '', carbs: '', fat: '' }); }}
+                                onClick={() => {
+                                    setShowModal(false);
+                                    setExName('');
+                                    setEditExId(null);
+                                    setFoodForm({ name: '', calories: '', protein: '', carbs: '', fat: '' });
+                                    setEditFoodId(null);
+                                }}
                                 className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"
                             >
                                 <X className="w-4 h-4 text-text-secondary" />
@@ -371,11 +421,11 @@ export default function Library() {
                                         />
                                     </div>
                                     <button
-                                        onClick={addExercise}
+                                        onClick={saveExercise}
                                         disabled={!exName.trim()}
                                         className="w-full bg-royal-600 text-white py-3 rounded-xl font-semibold text-sm disabled:opacity-40 active:scale-[0.98] transition-transform"
                                     >
-                                        Add Exercise
+                                        {editExId ? 'Save Changes' : 'Add Exercise'}
                                     </button>
                                 </>
                             ) : (
@@ -408,11 +458,11 @@ export default function Library() {
                                         ))}
                                     </div>
                                     <button
-                                        onClick={addFood}
+                                        onClick={saveFood}
                                         disabled={!foodForm.name.trim()}
                                         className="w-full bg-royal-600 text-white py-3 rounded-xl font-semibold text-sm disabled:opacity-40 active:scale-[0.98] transition-transform"
                                     >
-                                        Add Food
+                                        {editFoodId ? 'Save Changes' : 'Add Food'}
                                     </button>
                                 </>
                             )}

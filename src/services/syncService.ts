@@ -1,6 +1,6 @@
 import { doc, setDoc, collection, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
-import type { UserProfile, Food, NutritionLog, WorkoutSession, WorkoutSet, MentalHealthLog } from "../db";
+import type { UserProfile, Food, NutritionLog, WorkoutSession, WorkoutSet, MentalHealthLog, Exercise } from "../db";
 
 const DEFAULT_USER_ID = "default_user";
 
@@ -25,10 +25,10 @@ export async function syncNutrition(foods: Food[], logs: NutritionLog[]) {
 /**
  * Syncs all workout-related data to Firestore
  */
-export async function syncWorkouts(sessions: WorkoutSession[], sets: WorkoutSet[]) {
+export async function syncWorkouts(sessions: WorkoutSession[], sets: WorkoutSet[], exercises: Exercise[]) {
     const userRef = doc(db, "users", DEFAULT_USER_ID);
     const workoutsRef = doc(collection(userRef, "workouts"), "data");
-    await setDoc(workoutsRef, { sessions, sets });
+    await setDoc(workoutsRef, { sessions, sets, exercises });
 }
 
 /**
@@ -50,7 +50,7 @@ export async function fetchAllUserData() {
     const data = {
         profile: null as UserProfile | null,
         nutrition: { foods: [] as Food[], logs: [] as NutritionLog[] },
-        workouts: { sessions: [] as WorkoutSession[], sets: [] as WorkoutSet[] },
+        workouts: { sessions: [] as WorkoutSession[], sets: [] as WorkoutSet[], exercises: [] as Exercise[] },
         mentalHealth: { logs: [] as MentalHealthLog[] }
     };
 
