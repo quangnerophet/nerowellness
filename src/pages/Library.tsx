@@ -135,7 +135,7 @@ export default function Library() {
     return (
         <div className="flex flex-col h-full animate-fade-in">
             {/* Header */}
-            <div className="px-5 pt-5 pb-3">
+            <div className="px-5 pt-5 pb-3 max-w-4xl mx-auto w-full">
                 <h1 className="text-xl font-bold text-text-primary flex items-center gap-2">
                     <BookOpen className="w-5 h-5 text-royal-500" />
                     Library
@@ -144,7 +144,7 @@ export default function Library() {
             </div>
 
             {/* 3-Segment Control */}
-            <div className="px-5 mb-3">
+            <div className="px-5 mb-3 max-w-4xl mx-auto w-full">
                 <div className="bg-gray-100 rounded-xl p-1 flex">
                     {tabConfig.map((t) => (
                         <button
@@ -310,75 +310,79 @@ export default function Library() {
                     </div>
 
                     {/* List */}
-                    <div className="flex-1 overflow-y-auto custom-scrollbar px-5 pb-6 space-y-2">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar px-5 pb-6">
                         {activeTab === 'exercises' ? (
                             filteredExercises.length > 0 ? (
-                                filteredExercises.map((ex) => (
-                                    <div key={ex.id} className="flex items-center gap-3 bg-white rounded-xl px-4 py-3.5 border border-gray-100 shadow-sm">
-                                        <div className="w-9 h-9 rounded-xl bg-royal-50 flex items-center justify-center">
-                                            <Dumbbell className="w-4 h-4 text-royal-600" />
+                                <div className="md:grid md:grid-cols-2 md:gap-3 space-y-2 md:space-y-0">
+                                    {filteredExercises.map((ex) => (
+                                        <div key={ex.id} className="flex items-center gap-3 bg-white rounded-xl px-4 py-3.5 border border-gray-100 shadow-sm">
+                                            <div className="w-9 h-9 rounded-xl bg-royal-50 flex items-center justify-center">
+                                                <Dumbbell className="w-4 h-4 text-royal-600" />
+                                            </div>
+                                            <p className="flex-1 text-sm font-medium text-text-primary">{ex.name}</p>
+                                            <div className="flex items-center gap-1">
+                                                <button
+                                                    onClick={() => {
+                                                        setEditExId(ex.id!);
+                                                        setExName(ex.name);
+                                                        setShowModal(true);
+                                                    }}
+                                                    className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-royal-600 hover:bg-royal-50 transition-colors"
+                                                >
+                                                    <Edit2 className="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    onClick={() => deleteExercise(ex.id!)}
+                                                    className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-300 hover:text-danger hover:bg-red-50 transition-colors"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
                                         </div>
-                                        <p className="flex-1 text-sm font-medium text-text-primary">{ex.name}</p>
-                                        <div className="flex items-center gap-1">
-                                            <button
-                                                onClick={() => {
-                                                    setEditExId(ex.id!);
-                                                    setExName(ex.name);
-                                                    setShowModal(true);
-                                                }}
-                                                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-royal-600 hover:bg-royal-50 transition-colors"
-                                            >
-                                                <Edit2 className="w-4 h-4" />
-                                            </button>
-                                            <button
-                                                onClick={() => deleteExercise(ex.id!)}
-                                                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-300 hover:text-danger hover:bg-red-50 transition-colors"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))
+                                    ))}
+                                </div>
                             ) : <EmptyState type="exercises" />
                         ) : (
                             filteredFoods.length > 0 ? (
-                                filteredFoods.map((food) => (
-                                    <div key={food.id} className="flex items-center gap-3 bg-white rounded-xl px-4 py-3.5 border border-gray-100 shadow-sm">
-                                        <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center">
-                                            <Utensils className="w-4 h-4 text-emerald-600" />
+                                <div className="md:grid md:grid-cols-2 md:gap-3 space-y-2 md:space-y-0">
+                                    {filteredFoods.map((food) => (
+                                        <div key={food.id} className="flex items-center gap-3 bg-white rounded-xl px-4 py-3.5 border border-gray-100 shadow-sm">
+                                            <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center">
+                                                <Utensils className="w-4 h-4 text-emerald-600" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <p className="text-sm font-medium text-text-primary">{food.name}</p>
+                                                <p className="text-[11px] text-text-muted mt-0.5">
+                                                    {food.calories}cal · {food.protein}p · {food.carbs}c · {food.fat}f
+                                                </p>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <button
+                                                    onClick={() => {
+                                                        setEditFoodId(food.id!);
+                                                        setFoodForm({
+                                                            name: food.name,
+                                                            calories: String(food.calories),
+                                                            protein: String(food.protein),
+                                                            carbs: String(food.carbs),
+                                                            fat: String(food.fat)
+                                                        });
+                                                        setShowModal(true);
+                                                    }}
+                                                    className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-royal-600 hover:bg-royal-50 transition-colors"
+                                                >
+                                                    <Edit2 className="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    onClick={() => deleteFood(food.id!)}
+                                                    className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-300 hover:text-danger hover:bg-red-50 transition-colors"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
                                         </div>
-                                        <div className="flex-1">
-                                            <p className="text-sm font-medium text-text-primary">{food.name}</p>
-                                            <p className="text-[11px] text-text-muted mt-0.5">
-                                                {food.calories}cal · {food.protein}p · {food.carbs}c · {food.fat}f
-                                            </p>
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <button
-                                                onClick={() => {
-                                                    setEditFoodId(food.id!);
-                                                    setFoodForm({
-                                                        name: food.name,
-                                                        calories: String(food.calories),
-                                                        protein: String(food.protein),
-                                                        carbs: String(food.carbs),
-                                                        fat: String(food.fat)
-                                                    });
-                                                    setShowModal(true);
-                                                }}
-                                                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-royal-600 hover:bg-royal-50 transition-colors"
-                                            >
-                                                <Edit2 className="w-4 h-4" />
-                                            </button>
-                                            <button
-                                                onClick={() => deleteFood(food.id!)}
-                                                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-300 hover:text-danger hover:bg-red-50 transition-colors"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))
+                                    ))}
+                                </div>
                             ) : <EmptyState type="foods" />
                         )}
                     </div>

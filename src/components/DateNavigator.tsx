@@ -11,7 +11,7 @@ export default function DateNavigator() {
     return (
         <div className="px-5 pt-4 pb-1">
             {/* Navigator Row */}
-            <div className="flex items-center justify-center gap-3">
+            <div className="flex items-center justify-center md:justify-start gap-3">
                 <button
                     onClick={() => setSelectedDate(shiftDate(selectedDate, -1))}
                     className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 active:scale-90 transition-all"

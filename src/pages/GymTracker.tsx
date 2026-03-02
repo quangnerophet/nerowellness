@@ -184,7 +184,7 @@ export default function GymTracker() {
     return (
         <div className="flex flex-col h-full animate-fade-in">
             {/* Header */}
-            <div className="px-5 pt-4 pb-1 flex items-center justify-between">
+            <div className="px-5 pt-4 pb-1 flex items-center justify-between max-w-4xl mx-auto w-full">
                 <h1 className="text-xl font-bold text-text-primary flex items-center gap-2">
                     <Dumbbell className="w-5 h-5 text-royal-500" />
                     Workout
@@ -206,7 +206,9 @@ export default function GymTracker() {
                 )}
             </div>
 
-            <DateNavigator />
+            <div className="max-w-4xl mx-auto w-full">
+                <DateNavigator />
+            </div>
 
             {/* Session Tabs */}
             {todaySessions && todaySessions.length > 0 && (

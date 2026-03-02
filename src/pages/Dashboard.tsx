@@ -243,7 +243,7 @@ export default function Dashboard() {
     return (
         <div className="pb-4 animate-fade-in">
             {/* Header with pts badge */}
-            <div className="px-5 pt-5 flex items-center justify-between">
+            <div className="px-5 pt-5 flex items-center justify-between max-w-6xl mx-auto">
                 <h1 className="text-2xl font-bold text-text-primary">
                     {getGreeting()}{userName ? `, ${userName}` : ''} 👋
                 </h1>
@@ -253,251 +253,263 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            <DateNavigator />
+            <div className="max-w-6xl mx-auto">
+                <DateNavigator />
+            </div>
 
-            <div className="px-5 space-y-4 mt-2">
-                {/* Monthly Calendar Heatmap */}
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-                    <div className="flex items-center justify-between mb-3">
-                        <button onClick={prevMonth} className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-colors">
-                            <ChevronLeft className="w-4 h-4 text-text-secondary" />
-                        </button>
-                        <h3 className="text-sm font-semibold text-text-primary">
-                            {MONTH_NAMES[calMonth]} {calYear}
-                        </h3>
-                        <button onClick={nextMonth} className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-colors">
-                            <ChevronRight className="w-4 h-4 text-text-secondary" />
-                        </button>
-                    </div>
-
-                    <div className="grid grid-cols-7 gap-1 mb-1">
-                        {DAY_LABELS.map((d, i) => (
-                            <span key={i} className="text-[10px] text-text-muted font-semibold text-center uppercase">{d}</span>
-                        ))}
-                    </div>
-
-                    <div className="grid grid-cols-7 gap-1">
-                        {calendarDays.map((day, i) => {
-                            if (day === null) return <div key={`e-${i}`} className="aspect-square" />;
-                            const dateStr = fmtDate(calYear, calMonth, day);
-                            const isTodayCell = isCurrentMonth && day === todayParts[2];
-                            const isSelected = dateStr === selectedDate;
-                            const score = dailyScores.get(dateStr) ?? 0;
-                            const isFuture = dateStr > today;
-                            const isFlawless = score === 15;
-
-                            return (
-                                <button
-                                    key={dateStr}
-                                    disabled={isFuture}
-                                    onClick={() => !isFuture && setSelectedDate(dateStr)}
-                                    className={`aspect-square rounded-lg flex items-center justify-center relative transition-all text-xs ${isFuture
-                                        ? 'text-gray-300 cursor-not-allowed'
-                                        : `cursor-pointer active:scale-90 ${getHeatStyle(score, isSelected, isTodayCell)}`
-                                        }`}
-                                >
-                                    {day}
-                                    {isFlawless && !isSelected && (
-                                        <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-amber-500 rounded-full border border-white" />
-                                    )}
-                                </button>
-                            );
-                        })}
-                    </div>
-
-                    {/* Legend */}
-                    <div className="flex items-center justify-center gap-1.5 mt-3">
-                        <span className="text-[9px] text-text-muted">0</span>
-                        {[
-                            { bg: '#f3f4f6', label: '' },
-                            { bg: '#dbeafe', label: '1' },
-                            { bg: '#60a5fa', label: '6' },
-                            { bg: '#2563eb', label: '11' },
-                            { bg: '#f59e0b', label: '⭐' },
-                        ].map((c) => (
-                            <div key={c.bg} className="flex items-center gap-0.5">
-                                <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: c.bg }} />
-                                {c.label && <span className="text-[8px] text-text-muted">{c.label}</span>}
-                            </div>
-                        ))}
-                        <span className="text-[9px] text-text-muted">15</span>
-                    </div>
-                </div>
-
-                {/* Daily Summary — 4 items with RPG pts */}
-                <div className="grid grid-cols-4 gap-2">
-                    {/* Mood */}
-                    <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-2.5 border border-purple-100 text-center">
-                        <Smile className="w-4 h-4 text-purple-500 mx-auto mb-1" />
-                        <p className="text-[9px] text-text-muted font-medium uppercase tracking-wide">Mood</p>
-                        <p className="text-lg font-bold text-text-primary mt-0.5">
-                            {mentalLog?.moodScore ? ['😢', '😟', '😐', '🙂', '😄'][mentalLog.moodScore - 1] : '—'}
-                        </p>
-                        <span className={`text-[9px] font-bold px-1 py-0.5 rounded-full ${todayScore.mood > 0 ? 'bg-purple-100 text-purple-700' : 'text-transparent'
-                            }`}>
-                            +{todayScore.mood}
-                        </span>
-                    </div>
-                    {/* Sleep */}
-                    <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-2xl p-2.5 border border-indigo-100 text-center">
-                        <Moon className="w-4 h-4 text-indigo-500 mx-auto mb-1" />
-                        <p className="text-[9px] text-text-muted font-medium uppercase tracking-wide">Sleep</p>
-                        <p className="text-lg font-bold text-text-primary mt-0.5">
-                            {mentalLog?.sleepHours ? `${mentalLog.sleepHours}h` : '—'}
-                        </p>
-                        <span className={`text-[9px] font-bold px-1 py-0.5 rounded-full ${todayScore.sleep > 0 ? 'bg-indigo-100 text-indigo-700' : 'text-transparent'
-                            }`}>
-                            +{todayScore.sleep}
-                        </span>
-                    </div>
-                    {/* Workout */}
-                    <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-2.5 border border-amber-100 text-center">
-                        <Dumbbell className="w-4 h-4 text-amber-500 mx-auto mb-1" />
-                        <p className="text-[9px] text-text-muted font-medium uppercase tracking-wide">Gym</p>
-                        <p className="text-lg font-bold text-text-primary mt-0.5">
-                            {workoutFinishedToday ? '✓' : '—'}
-                        </p>
-                        <span className={`text-[9px] font-bold px-1 py-0.5 rounded-full ${todayScore.workout > 0 ? 'bg-amber-100 text-amber-700' : 'text-transparent'
-                            }`}>
-                            +{todayScore.workout}
-                        </span>
-                    </div>
-                    {/* Food */}
-                    <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl p-2.5 border border-emerald-100 text-center">
-                        <Utensils className="w-4 h-4 text-emerald-500 mx-auto mb-1" />
-                        <p className="text-[9px] text-text-muted font-medium uppercase tracking-wide">Food</p>
-                        <p className="text-sm font-bold text-text-primary mt-0.5 leading-tight">
-                            {totalCalories > 0 ? (
-                                <>{totalCalories}<span className="text-[8px] font-normal text-text-muted">/{dailyCalorieTarget}</span></>
-                            ) : '—'}
-                        </p>
-                        <span className={`text-[9px] font-bold px-1 py-0.5 rounded-full ${todayScore.protein > 0 ? 'bg-emerald-100 text-emerald-700' : 'text-transparent'
-                            }`}>
-                            +{todayScore.protein}
-                        </span>
-                    </div>
-                </div>
-
-                {/* Today's RPG Progress Bar */}
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-                    <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-semibold text-text-primary flex items-center gap-1.5">
-                            <Zap className="w-3.5 h-3.5 text-amber-500" />
-                            Today's Score
-                        </span>
-                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${ptsBadgeStyle}`}>
-                            {todayScore.total === 15 ? '⭐ FLAWLESS!' : `${todayScore.total} / 15`}
-                        </span>
-                    </div>
-                    <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-                        <div
-                            className={`h-full rounded-full transition-all duration-700 ${todayScore.total === 15
-                                ? 'bg-gradient-to-r from-amber-400 to-yellow-300'
-                                : 'bg-gradient-to-r from-royal-600 to-royal-400'
-                                }`}
-                            style={{ width: `${(todayScore.total / 15) * 100}%` }}
-                        />
-                    </div>
-                    <div className="flex justify-between mt-1.5 text-[10px] text-text-muted">
-                        <span>Sleep +{todayScore.sleep}/2</span>
-                        <span>Gym +{todayScore.workout}/5</span>
-                        <span>Protein +{todayScore.protein}/3</span>
-                        <span>Mood +{todayScore.mood}/5</span>
-                    </div>
-                </div>
-
-                {/* Rewards / Inventory Card */}
-                <div className="bg-gradient-to-r from-royal-800 to-royal-600 rounded-2xl p-4 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full -translate-y-6 translate-x-6" />
-                    <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/5 rounded-full translate-y-4 -translate-x-4" />
-                    <div className="relative z-10">
-                        <p className="text-white/60 text-[10px] font-semibold uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                            <Shield className="w-3 h-3" />
-                            Rewards / Inventory
-                        </p>
-                        <div className="flex items-center gap-4">
-                            <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/20">
-                                <span className="text-2xl">🛡️</span>
-                            </div>
-                            <div className="flex-1">
-                                <p className="text-white text-2xl font-bold">
-                                    {freezes}
-                                    <span className="text-sm font-medium text-white/70 ml-1.5">
-                                        {freezes === 1 ? 'Freeze' : 'Freezes'}
-                                    </span>
-                                </p>
-                                <p className="text-white/50 text-[11px] mt-0.5">
-                                    ⭐ {flawlessDays} Flawless Days · 🔥 {streak} Day Streak
-                                </p>
-                            </div>
+            {/* Desktop 12-col grid wrapper */}
+            <div className="px-5 mt-2 max-w-6xl mx-auto md:grid md:grid-cols-12 md:gap-6 md:items-start">
+                {/* Left column: Calendar + Summary + Score */}
+                <div className="md:col-span-8 space-y-4">
+                    {/* Monthly Calendar Heatmap */}
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+                        <div className="flex items-center justify-between mb-3">
+                            <button onClick={prevMonth} className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-colors">
+                                <ChevronLeft className="w-4 h-4 text-text-secondary" />
+                            </button>
+                            <h3 className="text-sm font-semibold text-text-primary">
+                                {MONTH_NAMES[calMonth]} {calYear}
+                            </h3>
+                            <button onClick={nextMonth} className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-colors">
+                                <ChevronRight className="w-4 h-4 text-text-secondary" />
+                            </button>
                         </div>
-                        <div className="mt-3">
-                            <div className="flex justify-between text-[10px] text-white/50 mb-1">
-                                <span>Next freeze</span>
-                                <span>{flawlessDays % 7}/7 flawless days</span>
-                            </div>
-                            <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                                <div
-                                    className="h-full bg-gradient-to-r from-amber-300 to-amber-400 rounded-full transition-all"
-                                    style={{ width: `${((flawlessDays % 7) / 7) * 100}%` }}
-                                />
-                            </div>
+
+                        <div className="grid grid-cols-7 gap-1 mb-1">
+                            {DAY_LABELS.map((d, i) => (
+                                <span key={i} className="text-[10px] text-text-muted font-semibold text-center uppercase">{d}</span>
+                            ))}
                         </div>
-                    </div>
-                </div>
 
-                {/* Hero CTA */}
-                <button
-                    onClick={() => setActiveTab('gym')}
-                    className="w-full bg-gradient-to-r from-royal-700 to-royal-500 text-white py-4 rounded-2xl font-semibold text-base flex items-center justify-center gap-2 shadow-lg shadow-royal-500/25 active:scale-[0.98] transition-transform"
-                >
-                    <Dumbbell className="w-5 h-5" />
-                    Start Today's Workout
-                </button>
+                        <div className="grid grid-cols-7 gap-1">
+                            {calendarDays.map((day, i) => {
+                                if (day === null) return <div key={`e-${i}`} className="aspect-square" />;
+                                const dateStr = fmtDate(calYear, calMonth, day);
+                                const isTodayCell = isCurrentMonth && day === todayParts[2];
+                                const isSelected = dateStr === selectedDate;
+                                const score = dailyScores.get(dateStr) ?? 0;
+                                const isFuture = dateStr > today;
+                                const isFlawless = score === 15;
 
-                {/* Recent Activity */}
-                <div>
-                    <div className="flex items-center justify-between mb-3">
-                        <h2 className="text-base font-semibold text-text-primary flex items-center gap-2">
-                            <TrendingUp className="w-4 h-4 text-royal-500" />
-                            Recent Activity
-                        </h2>
-                    </div>
-                    {recentSessions && recentSessions.length > 0 ? (
-                        <div className="space-y-2">
-                            {recentSessions.map((session) => {
-                                const sessScore = dailyScores.get(session.date) ?? 0;
                                 return (
-                                    <div key={session.id} className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3 border border-gray-100">
-                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${session.isCompleted ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'
-                                            }`}>
-                                            <Dumbbell className="w-4 h-4" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <p className="text-sm font-medium text-text-primary">Workout Session</p>
-                                            <p className="text-xs text-text-muted">{session.date}</p>
-                                        </div>
-                                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${sessScore === 15 ? 'bg-amber-100 text-amber-700'
-                                            : sessScore >= 11 ? 'bg-blue-100 text-blue-700'
-                                                : sessScore >= 1 ? 'bg-blue-50 text-blue-500'
-                                                    : 'bg-gray-100 text-text-muted'
-                                            }`}>
-                                            {sessScore > 0 ? `${sessScore} pts` : session.isCompleted ? 'Done' : 'Active'}
-                                        </span>
-                                        <ChevronRight className="w-4 h-4 text-text-muted" />
-                                    </div>
+                                    <button
+                                        key={dateStr}
+                                        disabled={isFuture}
+                                        onClick={() => !isFuture && setSelectedDate(dateStr)}
+                                        className={`aspect-square rounded-lg flex items-center justify-center relative transition-all text-xs ${isFuture
+                                            ? 'text-gray-300 cursor-not-allowed'
+                                            : `cursor-pointer active:scale-90 ${getHeatStyle(score, isSelected, isTodayCell)}`
+                                            }`}
+                                    >
+                                        {day}
+                                        {isFlawless && !isSelected && (
+                                            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-amber-500 rounded-full border border-white" />
+                                        )}
+                                    </button>
                                 );
                             })}
                         </div>
-                    ) : (
-                        <div className="text-center py-8 text-text-muted">
-                            <Dumbbell className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                            <p className="text-sm">No activity yet</p>
-                            <p className="text-xs mt-1">Start a workout to see it here!</p>
+
+                        {/* Legend */}
+                        <div className="flex items-center justify-center gap-1.5 mt-3">
+                            <span className="text-[9px] text-text-muted">0</span>
+                            {[
+                                { bg: '#f3f4f6', label: '' },
+                                { bg: '#dbeafe', label: '1' },
+                                { bg: '#60a5fa', label: '6' },
+                                { bg: '#2563eb', label: '11' },
+                                { bg: '#f59e0b', label: '⭐' },
+                            ].map((c) => (
+                                <div key={c.bg} className="flex items-center gap-0.5">
+                                    <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: c.bg }} />
+                                    {c.label && <span className="text-[8px] text-text-muted">{c.label}</span>}
+                                </div>
+                            ))}
+                            <span className="text-[9px] text-text-muted">15</span>
                         </div>
-                    )}
-                </div>
-            </div>
+                    </div>
+
+                    {/* Daily Summary — 4 items with RPG pts */}
+                    <div className="grid grid-cols-4 gap-2">
+                        {/* Mood */}
+                        <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-2.5 border border-purple-100 text-center">
+                            <Smile className="w-4 h-4 text-purple-500 mx-auto mb-1" />
+                            <p className="text-[9px] text-text-muted font-medium uppercase tracking-wide">Mood</p>
+                            <p className="text-lg font-bold text-text-primary mt-0.5">
+                                {mentalLog?.moodScore ? ['😢', '😟', '😐', '🙂', '😄'][mentalLog.moodScore - 1] : '—'}
+                            </p>
+                            <span className={`text-[9px] font-bold px-1 py-0.5 rounded-full ${todayScore.mood > 0 ? 'bg-purple-100 text-purple-700' : 'text-transparent'
+                                }`}>
+                                +{todayScore.mood}
+                            </span>
+                        </div>
+                        {/* Sleep */}
+                        <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-2xl p-2.5 border border-indigo-100 text-center">
+                            <Moon className="w-4 h-4 text-indigo-500 mx-auto mb-1" />
+                            <p className="text-[9px] text-text-muted font-medium uppercase tracking-wide">Sleep</p>
+                            <p className="text-lg font-bold text-text-primary mt-0.5">
+                                {mentalLog?.sleepHours ? `${mentalLog.sleepHours}h` : '—'}
+                            </p>
+                            <span className={`text-[9px] font-bold px-1 py-0.5 rounded-full ${todayScore.sleep > 0 ? 'bg-indigo-100 text-indigo-700' : 'text-transparent'
+                                }`}>
+                                +{todayScore.sleep}
+                            </span>
+                        </div>
+                        {/* Workout */}
+                        <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-2.5 border border-amber-100 text-center">
+                            <Dumbbell className="w-4 h-4 text-amber-500 mx-auto mb-1" />
+                            <p className="text-[9px] text-text-muted font-medium uppercase tracking-wide">Gym</p>
+                            <p className="text-lg font-bold text-text-primary mt-0.5">
+                                {workoutFinishedToday ? '✓' : '—'}
+                            </p>
+                            <span className={`text-[9px] font-bold px-1 py-0.5 rounded-full ${todayScore.workout > 0 ? 'bg-amber-100 text-amber-700' : 'text-transparent'
+                                }`}>
+                                +{todayScore.workout}
+                            </span>
+                        </div>
+                        {/* Food */}
+                        <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl p-2.5 border border-emerald-100 text-center">
+                            <Utensils className="w-4 h-4 text-emerald-500 mx-auto mb-1" />
+                            <p className="text-[9px] text-text-muted font-medium uppercase tracking-wide">Food</p>
+                            <p className="text-sm font-bold text-text-primary mt-0.5 leading-tight">
+                                {totalCalories > 0 ? (
+                                    <>{totalCalories}<span className="text-[8px] font-normal text-text-muted">/{dailyCalorieTarget}</span></>
+                                ) : '—'}
+                            </p>
+                            <span className={`text-[9px] font-bold px-1 py-0.5 rounded-full ${todayScore.protein > 0 ? 'bg-emerald-100 text-emerald-700' : 'text-transparent'
+                                }`}>
+                                +{todayScore.protein}
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Today's RPG Progress Bar */}
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs font-semibold text-text-primary flex items-center gap-1.5">
+                                <Zap className="w-3.5 h-3.5 text-amber-500" />
+                                Today's Score
+                            </span>
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${ptsBadgeStyle}`}>
+                                {todayScore.total === 15 ? '⭐ FLAWLESS!' : `${todayScore.total} / 15`}
+                            </span>
+                        </div>
+                        <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+                            <div
+                                className={`h-full rounded-full transition-all duration-700 ${todayScore.total === 15
+                                    ? 'bg-gradient-to-r from-amber-400 to-yellow-300'
+                                    : 'bg-gradient-to-r from-royal-600 to-royal-400'
+                                    }`}
+                                style={{ width: `${(todayScore.total / 15) * 100}%` }}
+                            />
+                        </div>
+                        <div className="flex justify-between mt-1.5 text-[10px] text-text-muted">
+                            <span>Sleep +{todayScore.sleep}/2</span>
+                            <span>Gym +{todayScore.workout}/5</span>
+                            <span>Protein +{todayScore.protein}/3</span>
+                            <span>Mood +{todayScore.mood}/5</span>
+                        </div>
+                    </div>
+
+                </div>{/* /end left col */}
+
+                {/* Right column: Rewards + CTA + Recent Activity */}
+                <div className="md:col-span-4 space-y-4 mt-4 md:mt-0">
+
+                    {/* Rewards / Inventory Card */}
+                    <div className="bg-gradient-to-r from-royal-800 to-royal-600 rounded-2xl p-4 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full -translate-y-6 translate-x-6" />
+                        <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/5 rounded-full translate-y-4 -translate-x-4" />
+                        <div className="relative z-10">
+                            <p className="text-white/60 text-[10px] font-semibold uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                                <Shield className="w-3 h-3" />
+                                Rewards / Inventory
+                            </p>
+                            <div className="flex items-center gap-4">
+                                <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/20">
+                                    <span className="text-2xl">🛡️</span>
+                                </div>
+                                <div className="flex-1">
+                                    <p className="text-white text-2xl font-bold">
+                                        {freezes}
+                                        <span className="text-sm font-medium text-white/70 ml-1.5">
+                                            {freezes === 1 ? 'Freeze' : 'Freezes'}
+                                        </span>
+                                    </p>
+                                    <p className="text-white/50 text-[11px] mt-0.5">
+                                        ⭐ {flawlessDays} Flawless Days · 🔥 {streak} Day Streak
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="mt-3">
+                                <div className="flex justify-between text-[10px] text-white/50 mb-1">
+                                    <span>Next freeze</span>
+                                    <span>{flawlessDays % 7}/7 flawless days</span>
+                                </div>
+                                <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full bg-gradient-to-r from-amber-300 to-amber-400 rounded-full transition-all"
+                                        style={{ width: `${((flawlessDays % 7) / 7) * 100}%` }}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Hero CTA */}
+                    <button
+                        onClick={() => setActiveTab('gym')}
+                        className="w-full bg-gradient-to-r from-royal-700 to-royal-500 text-white py-4 rounded-2xl font-semibold text-base flex items-center justify-center gap-2 shadow-lg shadow-royal-500/25 active:scale-[0.98] transition-transform"
+                    >
+                        <Dumbbell className="w-5 h-5" />
+                        Start Today's Workout
+                    </button>
+
+                    {/* Recent Activity */}
+                    <div>
+                        <div className="flex items-center justify-between mb-3">
+                            <h2 className="text-base font-semibold text-text-primary flex items-center gap-2">
+                                <TrendingUp className="w-4 h-4 text-royal-500" />
+                                Recent Activity
+                            </h2>
+                        </div>
+                        {recentSessions && recentSessions.length > 0 ? (
+                            <div className="space-y-2">
+                                {recentSessions.map((session) => {
+                                    const sessScore = dailyScores.get(session.date) ?? 0;
+                                    return (
+                                        <div key={session.id} className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3 border border-gray-100">
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${session.isCompleted ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'
+                                                }`}>
+                                                <Dumbbell className="w-4 h-4" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <p className="text-sm font-medium text-text-primary">Workout Session</p>
+                                                <p className="text-xs text-text-muted">{session.date}</p>
+                                            </div>
+                                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${sessScore === 15 ? 'bg-amber-100 text-amber-700'
+                                                : sessScore >= 11 ? 'bg-blue-100 text-blue-700'
+                                                    : sessScore >= 1 ? 'bg-blue-50 text-blue-500'
+                                                        : 'bg-gray-100 text-text-muted'
+                                                }`}>
+                                                {sessScore > 0 ? `${sessScore} pts` : session.isCompleted ? 'Done' : 'Active'}
+                                            </span>
+                                            <ChevronRight className="w-4 h-4 text-text-muted" />
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <div className="text-center py-8 text-text-muted">
+                                <Dumbbell className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                                <p className="text-sm">No activity yet</p>
+                                <p className="text-xs mt-1">Start a workout to see it here!</p>
+                            </div>
+                        )}
+                    </div>
+
+                </div>{/* /end right col */}
+            </div>{/* /end grid */}
         </div>
     );
 }

@@ -113,18 +113,20 @@ export default function Nutrition() {
 
     return (
         <div className="pb-4 animate-fade-in">
-            <div className="px-5 pt-4">
+            <div className="px-5 pt-4 max-w-4xl mx-auto">
                 <h1 className="text-xl font-bold text-text-primary flex items-center gap-2">
                     <Utensils className="w-5 h-5 text-royal-500" />
                     Nutrition
                 </h1>
             </div>
 
-            <DateNavigator />
+            <div className="max-w-4xl mx-auto">
+                <DateNavigator />
+            </div>
 
-            <div className="px-5 space-y-4 mt-2">
-                {/* Macro Summary */}
-                <div className="grid grid-cols-2 gap-3">
+            <div className="px-5 space-y-4 mt-2 max-w-4xl mx-auto">
+                {/* Macro Summary - 4 cols on desktop */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {/* Calories with target + progress bar */}
                     <div className={`rounded-2xl p-3.5 border ${calorieMet ? 'bg-emerald-50 border-emerald-100' : calorieNear ? 'bg-amber-50 border-amber-100' : 'bg-orange-50 border-orange-100'}`}>
                         <div className="flex items-center justify-between mb-1.5">
@@ -136,7 +138,6 @@ export default function Nutrition() {
                             {totals.calories}
                             <span className="text-xs font-normal text-text-muted">/{dailyCalorieTarget}kcal</span>
                         </p>
-                        {/* Progress bar */}
                         <div className="h-1.5 bg-white/60 rounded-full overflow-hidden mt-1.5">
                             <div
                                 className={`h-full rounded-full transition-all duration-500 ${calorieMet ? 'bg-emerald-500' : calorieNear ? 'bg-amber-400' : 'bg-orange-400'}`}
@@ -156,7 +157,6 @@ export default function Nutrition() {
                             {totals.protein}
                             <span className="text-xs font-normal text-text-muted">/{proteinTarget}g</span>
                         </p>
-                        {/* Progress bar */}
                         <div className="h-1.5 bg-white/60 rounded-full overflow-hidden mt-1.5">
                             <div
                                 className={`h-full rounded-full transition-all duration-500 ${proteinMet ? 'bg-emerald-500' : 'bg-red-400'}`}
@@ -182,67 +182,69 @@ export default function Nutrition() {
                     </div>
                 </div>
 
-                {/* Meals */}
-                {MEAL_TYPES.map((meal) => {
-                    const logs = getMealLogs(meal.key);
-                    return (
-                        <div key={meal.key}>
-                            <div className="flex items-center justify-between mb-2">
-                                <h2 className="text-sm font-semibold text-text-primary flex items-center gap-2">
-                                    <span>{meal.icon}</span>
-                                    {meal.label}
-                                    {logs.length > 0 && (
-                                        <span className="text-[11px] text-text-muted font-normal">({logs.length})</span>
+                {/* Meals - 2-col on desktop */}
+                <div className="md:grid md:grid-cols-2 md:gap-6 space-y-4 md:space-y-0">
+                    {MEAL_TYPES.map((meal) => {
+                        const logs = getMealLogs(meal.key);
+                        return (
+                            <div key={meal.key}>
+                                <div className="flex items-center justify-between mb-2">
+                                    <h2 className="text-sm font-semibold text-text-primary flex items-center gap-2">
+                                        <span>{meal.icon}</span>
+                                        {meal.label}
+                                        {logs.length > 0 && (
+                                            <span className="text-[11px] text-text-muted font-normal">({logs.length})</span>
+                                        )}
+                                    </h2>
+                                    {!readOnly && (
+                                        <button
+                                            onClick={() => { setActiveMeal(meal.key); setShowModal(true); }}
+                                            className="text-royal-500 text-xs font-semibold flex items-center gap-0.5 active:scale-95 transition-transform"
+                                        >
+                                            <Plus className="w-3.5 h-3.5" />
+                                            Add
+                                        </button>
                                     )}
-                                </h2>
-                                {!readOnly && (
-                                    <button
-                                        onClick={() => { setActiveMeal(meal.key); setShowModal(true); }}
-                                        className="text-royal-500 text-xs font-semibold flex items-center gap-0.5 active:scale-95 transition-transform"
-                                    >
-                                        <Plus className="w-3.5 h-3.5" />
-                                        Add
-                                    </button>
+                                </div>
+                                {logs.length > 0 ? (
+                                    <div className="space-y-1.5">
+                                        {logs.map((log) => {
+                                            const food = allFoods?.find((f) => f.id === log.foodId);
+                                            return (
+                                                <div key={log.id} className="flex items-center gap-3 bg-gray-50 rounded-xl px-3 py-2.5 border border-gray-100">
+                                                    <div className="flex-1">
+                                                        <p className="text-sm font-medium text-text-primary">{food?.name ?? 'Unknown'}</p>
+                                                        <p className="text-[11px] text-text-muted">
+                                                            {food?.calories}cal · {food?.protein}p · {food?.carbs}c · {food?.fat}f
+                                                        </p>
+                                                    </div>
+                                                    {!readOnly && (
+                                                        <button
+                                                            onClick={() => removeLog(log.id!)}
+                                                            className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-300 hover:text-danger hover:bg-red-50 transition-colors"
+                                                        >
+                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <div className="bg-gray-50/50 rounded-xl py-3 text-center border border-dashed border-gray-200">
+                                        <p className="text-xs text-text-muted">No food logged</p>
+                                    </div>
                                 )}
                             </div>
-                            {logs.length > 0 ? (
-                                <div className="space-y-1.5">
-                                    {logs.map((log) => {
-                                        const food = allFoods?.find((f) => f.id === log.foodId);
-                                        return (
-                                            <div key={log.id} className="flex items-center gap-3 bg-gray-50 rounded-xl px-3 py-2.5 border border-gray-100">
-                                                <div className="flex-1">
-                                                    <p className="text-sm font-medium text-text-primary">{food?.name ?? 'Unknown'}</p>
-                                                    <p className="text-[11px] text-text-muted">
-                                                        {food?.calories}cal · {food?.protein}p · {food?.carbs}c · {food?.fat}f
-                                                    </p>
-                                                </div>
-                                                {!readOnly && (
-                                                    <button
-                                                        onClick={() => removeLog(log.id!)}
-                                                        className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-300 hover:text-danger hover:bg-red-50 transition-colors"
-                                                    >
-                                                        <Trash2 className="w-3.5 h-3.5" />
-                                                    </button>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            ) : (
-                                <div className="bg-gray-50/50 rounded-xl py-3 text-center border border-dashed border-gray-200">
-                                    <p className="text-xs text-text-muted">No food logged</p>
-                                </div>
-                            )}
-                        </div>
-                    );
-                })}
+                        );
+                    })}
+                </div>
             </div>
 
             {/* Modal */}
             {showModal && !readOnly && (
-                <div className="fixed inset-0 bg-black/40 z-50 flex items-end justify-center">
-                    <div className="bg-white w-full max-w-[400px] rounded-t-3xl animate-slide-up max-h-[80%] flex flex-col">
+                <div className="fixed inset-0 bg-black/40 z-50 flex items-end justify-center md:items-center">
+                    <div className="bg-white w-full max-w-[480px] rounded-t-3xl md:rounded-3xl animate-slide-up max-h-[80%] flex flex-col md:max-h-[600px]">
                         <div className="px-5 pt-5 pb-3 flex items-center justify-between border-b border-gray-100">
                             <h2 className="text-lg font-bold text-text-primary">
                                 Add to {MEAL_TYPES.find((m) => m.key === activeMeal)?.label}
